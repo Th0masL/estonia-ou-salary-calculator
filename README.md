@@ -24,6 +24,8 @@ Options:
 - **EE client** — adds the 24% VAT line to your invoice (pass-through, doesn't affect take-home).
 - **Pension on 100% dividends** — when salary is 0%, adds the minimum social tax + optional 6% pension.
 
+**Shareable links:** every input is captured in the page URL — use the **Copy shareable link** button to send a pre-filled calculation to someone.
+
 ## Tax rates (2026)
 
 All rates live in the `R = { ... }` object near the top of the `<script>` in

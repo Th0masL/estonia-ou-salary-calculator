@@ -66,6 +66,9 @@
   .toggle .t-text { font-size: .9rem; }
   .toggle .t-text small { display:block; color: var(--muted); font-size:.8rem; margin-top:1px; }
   .toggle.disabled { opacity: .45; }
+  .share-btn { width:100%; margin-top:22px; padding:12px; border:1.5px solid var(--blue); background:#fff; color:var(--blue-dark); font-weight:700; font-size:.92rem; border-radius:10px; cursor:pointer; transition: background .15s, color .15s, border-color .15s; }
+  .share-btn:hover { background: rgba(0,114,206,.07); }
+  .share-btn.copied { background: var(--good-bg); border-color: var(--good); color: var(--good); }
 
   /* results */
   .headline { text-align:center; padding: 6px 0 18px; border-bottom: 1px solid var(--line); margin-bottom: 16px; }
@@ -173,6 +176,8 @@
           </span>
         </div>
       </div>
+
+      <button type="button" id="shareBtn" class="share-btn">🔗 Copy shareable link</button>
     </section>
 
     <!-- RESULTS -->
@@ -393,6 +398,9 @@ function render() {
   } else {
     vatNote.style.display = "none";
   }
+
+  // keep the address bar in sync so it's always a shareable link
+  try { history.replaceState(null, "", shareURL()); } catch (e) {}
 }
 
 /* keep slider + number box in sync */
@@ -403,6 +411,48 @@ salaryPctNum.addEventListener("input", () => {
 });
 [bill, basicEx, isEE, payPension].forEach(el => el.addEventListener("input", render));
 
+/* ---- shareable URL state ---- */
+function buildParams() {
+  const p = new URLSearchParams();
+  p.set("bill", String(Math.max(0, +bill.value || 0)));
+  p.set("salary", String(Math.min(100, Math.max(0, +salaryPct.value || 0))));
+  p.set("exemption", basicEx.checked ? "1" : "0");
+  p.set("ee", isEE.checked ? "1" : "0");
+  p.set("pension", payPension.checked ? "1" : "0");
+  return p.toString();
+}
+function shareURL() {
+  return location.href.split("?")[0].split("#")[0] + "?" + buildParams();
+}
+function readURL() {
+  const p = new URLSearchParams(location.search);
+  if (p.has("bill")) { const b = parseFloat(p.get("bill")); if (isFinite(b) && b >= 0) bill.value = b; }
+  if (p.has("salary")) {
+    let s = parseInt(p.get("salary"), 10);
+    if (isFinite(s)) { s = Math.min(100, Math.max(0, s)); salaryPct.value = s; salaryPctNum.value = s; }
+  }
+  const setBool = (k, el) => { if (p.has(k)) el.checked = p.get(k) === "1"; };
+  setBool("exemption", basicEx); setBool("ee", isEE); setBool("pension", payPension);
+}
+
+const shareBtn = $("shareBtn");
+shareBtn.addEventListener("click", async () => {
+  const url = shareURL();
+  try { history.replaceState(null, "", url); } catch (e) {}
+  try {
+    await navigator.clipboard.writeText(url);
+  } catch (e) {
+    const t = document.createElement("input");
+    t.value = url; document.body.appendChild(t); t.select();
+    try { document.execCommand("copy"); } catch (_) {}
+    document.body.removeChild(t);
+  }
+  shareBtn.textContent = "✓ Link copied!";
+  shareBtn.classList.add("copied");
+  setTimeout(() => { shareBtn.textContent = "🔗 Copy shareable link"; shareBtn.classList.remove("copied"); }, 1800);
+});
+
+readURL();
 render();
 </script>
 </body>
