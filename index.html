@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estonian OÜ Salary Calculator</title>
+<meta name="description" content="Calculate your take-home pay from an Estonian OÜ using a mix of monthly salary and dividends. 2026 tax rates. All calculation runs in your browser.">
+<style>
+  :root {
+    --blue: #0072ce;       /* Estonian flag blue */
+    --blue-dark: #005aa3;
+    --ink: #1b1f24;
+    --muted: #6b7280;
+    --line: #e6e8eb;
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --good: #0a7d3c;
+    --good-bg: #e8f6ee;
+    --neg: #b4232c;
+    --radius: 14px;
+    --shadow: 0 1px 3px rgba(16,24,40,.06), 0 8px 28px rgba(16,24,40,.06);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 18px 64px; }
+  header { text-align: center; margin-bottom: 26px; }
+  .flag { display:inline-flex; border-radius:6px; overflow:hidden; box-shadow: var(--shadow); margin-bottom:14px; }
+  .flag span { width: 30px; height: 20px; display:block; }
+  h1 { font-size: clamp(1.5rem, 3vw, 2.1rem); margin: 4px 0 6px; letter-spacing:-.02em; }
+  .sub { color: var(--muted); max-width: 640px; margin: 0 auto; font-size: .98rem; }
+  .grid { display: grid; grid-template-columns: 1fr 1.25fr; gap: 22px; align-items: start; }
+  @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px; }
+  .card h2 { font-size: .82rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 18px; font-weight: 700; }
+  .field { margin-bottom: 20px; }
+  .field:last-child { margin-bottom: 0; }
+  label { display: block; font-weight: 600; font-size: .94rem; margin-bottom: 7px; }
+  label .hint { font-weight: 400; color: var(--muted); font-size: .82rem; }
+  .input-eur { position: relative; }
+  .input-eur::before { content: "€"; position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: 600; }
+  input[type=number] {
+    width: 100%; padding: 11px 13px 11px 26px; font-size: 1.05rem; font-weight: 600;
+    border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink);
+  }
+  input[type=number]:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,114,206,.12); }
+  #salaryPctNum { flex: none; width: 88px; padding: 10px 6px 10px 12px; text-align: center; font-size: 1.05rem; }
+  .slider-row { display:flex; align-items:center; gap:14px; }
+  input[type=range] { flex:1; accent-color: var(--blue); height: 6px; }
+  .split-badges { display:flex; justify-content:space-between; margin-top:9px; font-size:.85rem; }
+  .split-badges b { font-size: .95rem; }
+  .split-hint { font-size: .82rem; color: var(--blue-dark); background: rgba(0,114,206,.07); border-radius: 9px; padding: 9px 12px; margin: 11px 0 0; display: none; }
+  .split-hint.show { display: block; }
+  .pill { padding: 2px 9px; border-radius: 999px; font-weight: 600; }
+  .pill.sal { background: rgba(0,114,206,.1); color: var(--blue-dark); }
+  .pill.div { background: var(--good-bg); color: var(--good); }
+  .toggle { display:flex; align-items:flex-start; gap:11px; padding: 12px 0; border-top: 1px solid var(--line); }
+  .toggle:first-of-type { border-top: none; }
+  .toggle input { margin-top: 3px; width: 17px; height: 17px; accent-color: var(--blue); flex:none; }
+  .toggle .t-text { font-size: .9rem; }
+  .toggle .t-text small { display:block; color: var(--muted); font-size:.8rem; margin-top:1px; }
+  .toggle.disabled { opacity: .45; }
+
+  /* results */
+  .headline { text-align:center; padding: 6px 0 18px; border-bottom: 1px solid var(--line); margin-bottom: 16px; }
+  .headline .lbl { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing:.07em; font-weight:700; }
+  .headline .big { font-size: clamp(2rem, 6vw, 2.9rem); font-weight: 800; color: var(--good); letter-spacing:-.02em; line-height:1.1; margin: 4px 0; }
+  .headline .mo { color: var(--muted); font-size: 1rem; }
+  .headline .mo b { color: var(--ink); }
+
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  th { text-align: right; font-size: .72rem; text-transform: uppercase; letter-spacing:.06em; color: var(--muted); padding: 0 0 8px; font-weight: 700; }
+  th:first-child { text-align: left; }
+  td { padding: 5px 0; border-top: 1px solid var(--line); }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tr.lvl1 td:first-child { padding-left: 0; font-weight: 700; }
+  tr.lvl2 td:first-child { padding-left: 16px; }
+  tr.lvl3 td:first-child { padding-left: 34px; color: #374151; }
+  tr.lvl3 .num { color: #374151; }
+  tr.bucket td { font-weight: 700; }
+  tr.net td { background: var(--good-bg); font-weight: 700; }
+  tr.net td:first-child { border-radius: 8px 0 0 8px; padding-left: 34px; }
+  tr.net td:last-child { border-radius: 0 8px 8px 0; }
+  tr.net .num { color: var(--good); }
+  tr.total td { border-top: 2px solid var(--ink); font-weight: 800; font-size: 1rem; }
+  tr.deduct td:first-child::before { content:"− "; color: var(--neg); }
+  tr.credit td:first-child::before { content:"+ "; color: var(--good); }
+  .meta-line { display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:14px; border-top:1px solid var(--line); font-size:.9rem; }
+  .meta-line .rate { font-weight: 800; font-size: 1.1rem; }
+  .note { background:#fff8e6; border:1px solid #f3e2b0; color:#7a5b00; font-size:.83rem; padding:10px 13px; border-radius:10px; margin-top:14px; }
+  .note.info { background: rgba(0,114,206,.06); border-color: rgba(0,114,206,.2); color: var(--blue-dark); }
+
+  /* footnote citations */
+  .fn { font-size: .6rem; font-weight: 800; vertical-align: super; line-height: 0; margin-left: 1px; }
+  .fn a { color: var(--blue); text-decoration: none; }
+  .fn a:hover { text-decoration: underline; }
+
+  .sources { margin-top: 22px; }
+  .sources p.lead { font-size: .85rem; color: var(--muted); margin: 0 0 6px; }
+  .sources ol { margin: 8px 0 0; padding-left: 26px; font-size: .85rem; line-height: 1.45; }
+  .sources li { padding: 5px 0; }
+  .sources li::marker { color: var(--blue); font-weight: 700; }
+  .sources li a { color: var(--blue-dark); word-break: break-word; }
+  .sources li:target { background: #fff8e6; border-radius: 5px; box-shadow: 0 0 0 6px #fff8e6; }
+
+  details.rates { margin-top: 22px; }
+  details.rates summary { cursor:pointer; font-weight:600; font-size:.9rem; color: var(--blue-dark); }
+  .rates-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 6px 22px; margin-top:12px; font-size:.85rem; }
+  .rates-grid div { display:flex; justify-content:space-between; border-bottom:1px dashed var(--line); padding:3px 0; }
+  .rates-grid span:last-child { font-weight:700; font-variant-numeric: tabular-nums; }
+
+  footer { text-align:center; color: var(--muted); font-size: .8rem; margin-top: 34px; line-height:1.6; }
+  footer a { color: var(--blue-dark); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="flag"><span style="background:#0072ce"></span><span style="background:#111"></span><span style="background:#fff;border:1px solid var(--line)"></span></span>
+    <h1>Estonian OÜ Salary Calculator</h1>
+    <p class="sub">See your real take-home pay when you mix a monthly <b>salary</b> with <b>dividends</b> from your Estonian OÜ. 2026 tax rates. Everything is computed in your browser — nothing is sent anywhere.</p>
+  </header>
+
+  <div class="grid">
+    <!-- INPUTS -->
+    <section class="card">
+      <h2>Your numbers</h2>
+
+      <div class="field">
+        <label for="bill">Annual amount billed by your OÜ <span class="hint">(revenue available to pay out, EUR / year)</span></label>
+        <div class="input-eur">
+          <input type="number" id="bill" value="100000" min="0" step="1000" inputmode="decimal">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="salaryPct">Share paid as monthly salary</label>
+        <div class="slider-row">
+          <input type="range" id="salaryPct" min="0" max="100" value="100" step="1">
+          <input type="number" id="salaryPctNum" value="100" min="0" max="100" step="1">
+        </div>
+        <div class="split-badges">
+          <span class="pill sal">Salary <b id="salShare">100%</b></span>
+          <span class="pill div">Dividends <b id="divShare">0%</b></span>
+        </div>
+        <p class="split-hint" id="splitHint"></p>
+      </div>
+
+      <div class="field" style="margin-top:24px">
+        <label style="margin-bottom:4px">Options</label>
+        <div class="toggle">
+          <input type="checkbox" id="basicEx" checked>
+          <span class="t-text">Apply basic exemption (€700/mo)
+            <small>2026 tax-free allowance, €8,400/yr. Untick if claimed at another employer.</small>
+          </span>
+        </div>
+        <div class="toggle">
+          <input type="checkbox" id="isEE">
+          <span class="t-text">My client is an Estonian (EE) company
+            <small>On → adds 24% VAT to the invoice. Off → e.g. a US / non-EU client, no Estonian VAT. Either way your take-home is the same.</small>
+          </span>
+        </div>
+        <div class="toggle" id="pensionToggle">
+          <input type="checkbox" id="payPension" checked>
+          <span class="t-text">Self-fund pension when on 100% dividends
+            <small>Only at 0% salary. Sets aside 6% — matching what a salary would put in your II-pillar fund (your 2% + the 4% the state adds from social tax), since neither happens on dividends.</small>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULTS -->
+    <section class="card">
+      <h2>Your take-home</h2>
+      <div class="headline">
+        <div class="lbl">Net in your pocket</div>
+        <div class="big" id="finalYear">€0</div>
+        <div class="mo">≈ <b id="finalMonth">€0</b> / month</div>
+      </div>
+
+      <table>
+        <thead>
+          <tr><th>Breakdown</th><th>Yearly</th><th>Monthly</th></tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+
+      <div class="meta-line">
+        <span>Total taxes &amp; contributions</span>
+        <span><span class="rate" id="effRate">0%</span> &middot; <span id="totalTax">€0</span>/yr</span>
+      </div>
+
+      <div class="note info" id="vatNote" style="display:none"></div>
+
+      <details class="rates">
+        <summary>Assumptions &amp; 2026 tax rates</summary>
+        <div class="rates-grid">
+          <div><span>Employer social tax</span><span>33%</span></div>
+          <div><span>Income tax</span><span>22%</span></div>
+          <div><span>Employer unemployment</span><span>0.8%</span></div>
+          <div><span>Employee unemployment</span><span>1.6%</span></div>
+          <div><span>Funded pension (II pillar)</span><span>2%</span></div>
+          <div><span>Dividend tax (22/78)</span><span>22%</span></div>
+          <div><span>Basic exemption</span><span>€8,400/yr</span></div>
+          <div><span>VAT (EE clients only)</span><span>24%</span></div>
+          <div><span>Min. social tax (no salary)</span><span>€292.38/mo</span></div>
+          <div><span>Self-funded pension (no salary)</span><span>6%</span></div>
+        </div>
+      </details>
+    </section>
+  </div>
+
+  <section class="card sources">
+    <h2>Sources &amp; references</h2>
+    <p class="lead">All rates are for 2026, primarily from the Estonian Tax and Customs Board (EMTA). The superscript numbers in the breakdown link to these sources.</p>
+    <ol>
+      <li id="ref1">Social tax 33%, and the 2026 minimum monthly obligation (€886 base × 33% = €292.38) — <a href="https://www.emta.ee/en/business-client/taxes-and-payment/income-and-social-taxes/social-tax" target="_blank" rel="noopener">emta.ee — Social tax</a></li>
+      <li id="ref2">Unemployment insurance premiums: employer 0.8%, employee 1.6% (fixed 2025–2028) — <a href="https://www.emta.ee/en/business-client/taxes-and-payment/income-and-social-taxes/unemployment-insurance-premiums" target="_blank" rel="noopener">emta.ee — Unemployment insurance premiums</a></li>
+      <li id="ref3">Mandatory funded pension (II pillar): your 2% contribution, plus the 4% the state adds from social tax (6% total on a salary) — <a href="https://www.emta.ee/en/business-client/taxes-and-payment/income-and-social-taxes/contributions-mandatory-funded-pension" target="_blank" rel="noopener">emta.ee — Funded pension contributions</a></li>
+      <li id="ref4">Basic exemption €8,400/yr (€700/mo), flat from 2026 with no income phase-out — <a href="https://www.emta.ee/en/private-client/taxes-and-payment/tax-incentives/calculation-basic-exemption" target="_blank" rel="noopener">emta.ee — Calculation of basic exemption</a></li>
+      <li id="ref5">Personal income tax 22% (the planned rise to 24% was cancelled in December 2025) — <a href="https://www.emta.ee/en/private-client/taxes-and-payment/declaration-income/tax-rates" target="_blank" rel="noopener">emta.ee — Tax rates</a></li>
+      <li id="ref6">Dividend / distributed-profit tax 22/78 — 22% of the gross (the reduced 14/86 rate was abolished in 2025) — <a href="https://www.emta.ee/en/business-client/taxes-and-payment/income-and-social-taxes/taxation-dividends" target="_blank" rel="noopener">emta.ee — Taxation of dividends</a></li>
+      <li id="ref7">Standard VAT 24% (permanent since 1 July 2025; applies to invoices to EE clients) — <a href="https://www.emta.ee/en/business-client/taxes-and-payment/value-added-tax" target="_blank" rel="noopener">emta.ee — Value added tax</a></li>
+    </ol>
+  </section>
+
+  <footer>
+    Estimates based on Estonian tax rules effective 2026. Funded pension is your own savings (II pillar), shown as a deduction from take-home cash.<br>
+    Not tax advice — verify with the <a href="https://www.emta.ee/en" target="_blank" rel="noopener">Estonian Tax and Customs Board</a> or your accountant.
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+/* ===== 2026 Estonian rates — edit here to update yearly ===== */
+const R = {
+  socialTax:        0.33,   // employer, % of gross wage
+  unempEmployer:    0.008,  // employer unemployment, % of gross
+  unempEmployee:    0.016,  // employee unemployment, % of gross
+  pensionII:        0.02,   // funded pension (II pillar), % of gross
+  incomeTax:        0.22,   // personal income tax
+  dividendTax:      0.22,   // corporate tax on distributed profit (22/78 = 22% of gross)
+  vat:              0.24,   // applied to invoice only when client is EE
+  basicExemption:   8400,   // 2026 flat annual allowance (€700/mo), no phase-out
+  socialTaxMinMo:   292.38, // 2026 monthly min social tax (health insurance) if no salary = €886 base × 33%
+  pensionNoSalary:  0.06    // pension contribution if no salary & opted in
+};
+
+/* ===== elements ===== */
+const $ = id => document.getElementById(id);
+const bill = $("bill"), salaryPct = $("salaryPct"), salaryPctNum = $("salaryPctNum");
+const basicEx = $("basicEx"), isEE = $("isEE"), payPension = $("payPension"), pensionToggle = $("pensionToggle");
+
+const eur = new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+const pct = n => (n).toLocaleString("en-IE", { maximumFractionDigits: 1 }) + "%";
+const fn = n => `<sup class="fn"><a href="#ref${n}" title="See source ${n}">${n}</a></sup>`;
+
+function calc() {
+  const billV   = Math.max(0, +bill.value || 0);
+  const salPct  = Math.min(100, Math.max(0, +salaryPct.value || 0));
+  const divPct  = 100 - salPct;
+
+  const salaryBucket   = billV * salPct / 100;   // employer cost allocated to salary
+  const dividendBucket = billV * divPct / 100;   // profit allocated to dividends
+
+  /* ----- salary side ----- */
+  const employerMult     = 1 + R.socialTax + R.unempEmployer;       // gross * this = employer cost
+  const gross            = salaryBucket / employerMult;
+  const socialTaxAmt     = gross * R.socialTax;
+  const unempEmployerAmt = gross * R.unempEmployer;
+  const pensionAmt       = gross * R.pensionII;
+  const unempEmployeeAmt = gross * R.unempEmployee;
+
+  const taxableBeforeEx  = gross - pensionAmt - unempEmployeeAmt;
+  const exemption        = (salaryBucket > 0 && basicEx.checked)
+                             ? Math.min(R.basicExemption, Math.max(0, taxableBeforeEx))
+                             : 0;
+  const incomeTaxAmt     = Math.max(0, taxableBeforeEx - exemption) * R.incomeTax;
+  const netSalary        = gross - pensionAmt - unempEmployeeAmt - incomeTaxAmt;
+
+  /* ----- dividend side ----- */
+  const noSalary         = salaryBucket <= 0;
+  const dividendGross    = dividendBucket;
+  const dividendTaxAmt   = dividendGross * R.dividendTax;
+  const socialMinAmt     = noSalary ? R.socialTaxMinMo * 12 : 0;
+  const pensionNoSalAmt  = (noSalary && payPension.checked) ? dividendGross * R.pensionNoSalary : 0;
+  const netDividend      = dividendGross - dividendTaxAmt - socialMinAmt - pensionNoSalAmt;
+
+  /* ----- totals ----- */
+  const finalTakeHome    = netSalary + netDividend;
+  const totalTax         = billV - finalTakeHome;
+  const effRate          = billV > 0 ? totalTax / billV * 100 : 0;
+
+  return { billV, salPct, divPct, salaryBucket, dividendBucket, gross, socialTaxAmt,
+           unempEmployerAmt, pensionAmt, unempEmployeeAmt, exemption, incomeTaxAmt, netSalary,
+           noSalary, dividendGross, dividendTaxAmt, socialMinAmt, pensionNoSalAmt, netDividend,
+           finalTakeHome, totalTax, effRate };
+}
+
+function row(label, cls, yearly) {
+  const mo = yearly / 12;
+  return `<tr class="${cls}"><td>${label}</td>` +
+         `<td class="num">${eur.format(yearly)}</td>` +
+         `<td class="num">${eur.format(mo)}</td></tr>`;
+}
+
+function render() {
+  const d = calc();
+
+  // split labels
+  $("salShare").textContent = d.salPct + "%";
+  $("divShare").textContent = d.divPct + "%";
+
+  // contextual hint at the extremes of the split
+  const hint = $("splitHint");
+  if (d.salPct >= 100) {
+    hint.textContent = "100% salary — equivalent to a regular Estonian salary: your OÜ employs you and pays normal payroll taxes.";
+    hint.className = "split-hint show";
+  } else if (d.salPct <= 0) {
+    hint.textContent = "0% salary — living entirely on dividends: the health-insurance minimum social tax and (optionally) self-funded pension apply.";
+    hint.className = "split-hint show";
+  } else {
+    hint.className = "split-hint";
+  }
+
+  // disable the pension toggle visually when it has no effect
+  pensionToggle.classList.toggle("disabled", !d.noSalary);
+
+  // headline
+  $("finalYear").textContent  = eur.format(d.finalTakeHome);
+  $("finalMonth").textContent = eur.format(d.finalTakeHome / 12);
+
+  // breakdown rows
+  let html = "";
+  html += row("OÜ amount billed", "lvl1", d.billV);
+
+  // salary branch
+  html += row("Allocated to salary", "lvl2 bucket", d.salaryBucket);
+  if (d.salaryBucket > 0) {
+    html += row("Employer social tax (33%)" + fn(1), "lvl3 deduct", d.socialTaxAmt);
+    html += row("Employer unemployment (0.8%)" + fn(2), "lvl3 deduct", d.unempEmployerAmt);
+    html += row("Gross wage", "lvl3", d.gross);
+    html += row("Funded pension II (2%)" + fn(3), "lvl3 deduct", d.pensionAmt);
+    html += row("Employee unemployment (1.6%)" + fn(2), "lvl3 deduct", d.unempEmployeeAmt);
+    if (d.exemption > 0)
+      html += row("Basic exemption (tax-free)" + fn(4), "lvl3 credit", d.exemption);
+    html += row("Income tax (22%)" + fn(5), "lvl3 deduct", d.incomeTaxAmt);
+    html += row("Net salary", "lvl3 net", d.netSalary);
+  }
+
+  // dividend branch
+  html += row("Allocated to dividends", "lvl2 bucket", d.dividendBucket);
+  if (d.dividendBucket > 0) {
+    html += row("Dividend tax (22%)" + fn(6), "lvl3 deduct", d.dividendTaxAmt);
+    if (d.socialMinAmt > 0)
+      html += row("Min. social tax (health insurance)" + fn(1), "lvl3 deduct", d.socialMinAmt);
+    if (d.pensionNoSalAmt > 0)
+      html += row("Self-funded pension (6%)" + fn(3), "lvl3 deduct", d.pensionNoSalAmt);
+    html += row("Net dividend", "lvl3 net", d.netDividend);
+  }
+
+  html += row("Final take-home", "lvl1 total", d.finalTakeHome);
+  $("rows").innerHTML = html;
+
+  // meta
+  $("effRate").textContent  = pct(d.effRate);
+  $("totalTax").textContent = eur.format(d.totalTax);
+
+  // VAT note (informational, pass-through)
+  const vatNote = $("vatNote");
+  if (isEE.checked) {
+    const vat = d.billV * R.vat;
+    vatNote.style.display = "block";
+    vatNote.innerHTML = `<b>EE client:</b> you invoice ${eur.format(d.billV)} + ${eur.format(vat)} VAT (24%)${fn(7)} = <b>${eur.format(d.billV + vat)}</b>. The VAT is collected and remitted to the tax office — it does not change your take-home.`;
+  } else {
+    vatNote.style.display = "none";
+  }
+}
+
+/* keep slider + number box in sync */
+salaryPct.addEventListener("input", () => { salaryPctNum.value = salaryPct.value; render(); });
+salaryPctNum.addEventListener("input", () => {
+  let v = Math.min(100, Math.max(0, +salaryPctNum.value || 0));
+  salaryPct.value = v; render();
+});
+[bill, basicEx, isEE, payPension].forEach(el => el.addEventListener("input", render));
+
+render();
+</script>
+</body>
+</html>

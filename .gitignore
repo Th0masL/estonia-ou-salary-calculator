@@ -1,0 +1,9 @@
+# Local working files — not published
+*.xlsx
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
