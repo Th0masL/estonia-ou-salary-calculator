@@ -191,6 +191,8 @@
         <tbody id="rows"></tbody>
       </table>
 
+      <p class="note info" id="divFreqNote" style="display:none"></p>
+
       <div class="meta-line">
         <span>Total taxes &amp; contributions</span>
         <span><span class="rate" id="effRate">0%</span> &middot; <span id="totalTax">€0</span>/yr</span>
@@ -372,6 +374,15 @@ function render() {
   // meta
   $("effRate").textContent  = pct(d.effRate);
   $("totalTax").textContent = eur.format(d.totalTax);
+
+  // dividend frequency clarification (only shown when there are dividends)
+  const divNote = $("divFreqNote");
+  if (d.dividendBucket > 0) {
+    divNote.style.display = "block";
+    divNote.textContent = "💡 Dividends are usually distributed once or twice a year, not monthly — the monthly figure is just the yearly total ÷ 12, for comparison with salary. The payout frequency doesn't change the tax (a flat 22% whenever you distribute).";
+  } else {
+    divNote.style.display = "none";
+  }
 
   // VAT note (informational, pass-through)
   const vatNote = $("vatNote");
