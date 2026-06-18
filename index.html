@@ -112,6 +112,14 @@
   .sources li a { color: var(--blue-dark); word-break: break-word; }
   .sources li:target { background: #fff8e6; border-radius: 5px; box-shadow: 0 0 0 6px #fff8e6; }
 
+  .explainer { margin-top: 22px; }
+  .explainer h3 { font-size: 1rem; margin: 20px 0 7px; color: var(--ink); }
+  .explainer h3:first-of-type { margin-top: 4px; }
+  .explainer p { margin: 0 0 11px; font-size: .92rem; color: #2c333b; line-height: 1.6; }
+  .explainer ul { margin: 0 0 11px; padding-left: 20px; font-size: .92rem; line-height: 1.6; color: #2c333b; }
+  .explainer li { margin-bottom: 7px; }
+  .explainer i { font-style: italic; }
+
   details.rates { margin-top: 22px; }
   details.rates summary { cursor:pointer; font-weight:600; font-size:.9rem; color: var(--blue-dark); }
   .rates-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 6px 22px; margin-top:12px; font-size:.85rem; }
@@ -129,7 +137,7 @@
   <header>
     <span class="flag"><span style="background:#0072ce"></span><span style="background:#111"></span><span style="background:#fff;border:1px solid var(--line)"></span></span>
     <h1>Estonian OÜ Salary Calculator</h1>
-    <p class="sub">See your real take-home pay when you mix a monthly <b>salary</b> with <b>dividends</b> from your Estonian OÜ. 2026 tax rates. Everything is computed in your browser — nothing is sent anywhere.</p>
+    <p class="sub">An <b>Estonian OÜ</b> is a private limited company you can run online from anywhere. If you own one and also work in it, you can pay yourself with <b>salary</b>, <b>dividends</b>, or a mix — and each is taxed differently. This tool shows your real take-home for any split, using 2026 tax rates, computed entirely in your browser.</p>
   </header>
 
   <div class="grid">
@@ -224,6 +232,21 @@
       </details>
     </section>
   </div>
+
+  <section class="card explainer">
+    <h2>New to Estonian OÜs?</h2>
+
+    <h3>What's an OÜ, and why Estonia?</h3>
+    <p>An <i>OÜ</i> (<i>osaühing</i>) is Estonia's private limited company — the country's most common business form, and a popular choice for freelancers, consultants, and small software businesses who run an EU company remotely via Estonia's <b>e‑Residency</b> program. Estonia's headline feature: a company pays <b>no corporate tax on profit it keeps or reinvests</b> — tax is only due when profit is <b>distributed</b> (for example, as dividends).</p>
+
+    <h3>Salary vs dividends — the choice this tool models</h3>
+    <p>As an owner who also works in your OÜ, you can take money out two ways, and most people blend them:</p>
+    <ul>
+      <li><b>Salary</b> — taxed like ordinary Estonian employment (the company pays social tax on top; income tax, pension and unemployment are withheld). It costs more in tax, but it builds your <b>state pension and health insurance</b>.</li>
+      <li><b>Dividends</b> — your share of company profit, taxed at a flat <b>22/78</b> (~22% of the gross) at the company level. No social tax — but none of the salary-based benefits, and it can only come from actual profit.</li>
+    </ul>
+    <p>The slider lets you try any split and see exactly what reaches your pocket.</p>
+  </section>
 
   <section class="card sources">
     <h2>Sources &amp; references</h2>
