@@ -4,7 +4,7 @@ A simple, single-page calculator for estimating your **take-home pay** from an E
 private limited company (OÜ), when you pay yourself with a mix of **monthly salary** and
 **dividends** (paid out yearly or bi-yearly).
 
-👉 **Live:** https://th0masl.github.io/estonia-ou-salary-calculator/
+👉 **Live:** https://th0masl.github.io/estonian-ou-salary-calculator/
 
 Everything runs in your browser — no backend, no tracking, no data leaves your machine.
 
