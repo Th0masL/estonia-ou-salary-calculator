@@ -35,6 +35,7 @@
   .flag span { width: 30px; height: 20px; display:block; }
   h1 { font-size: clamp(1.5rem, 3vw, 2.1rem); margin: 4px 0 6px; letter-spacing:-.02em; }
   .sub { color: var(--muted); max-width: 640px; margin: 0 auto; font-size: .98rem; }
+  .sub-caveat { max-width: 600px; margin: 13px auto 0; font-size: .84rem; line-height: 1.5; color: #7a5b00; background: #fff8e6; border: 1px solid #f3e2b0; border-radius: 10px; padding: 9px 13px; text-align: center; }
   .grid { display: grid; grid-template-columns: 1fr 1.25fr; gap: 22px; align-items: start; }
   @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px; }
@@ -137,7 +138,8 @@
   <header>
     <span class="flag"><span style="background:#0072ce"></span><span style="background:#111"></span><span style="background:#fff;border:1px solid var(--line)"></span></span>
     <h1>Estonian OÜ Salary Calculator</h1>
-    <p class="sub">An <b>Estonian OÜ</b> is a private limited company you can run online from anywhere. If you own one and also work in it, you can pay yourself with <b>salary</b>, <b>dividends</b>, or a mix — and each is taxed differently. This tool shows your real take-home for any split, using 2026 tax rates, computed entirely in your browser.</p>
+    <p class="sub">An <b>Estonian OÜ</b> is a private limited company you can run from Estonia, or remotely from abroad via <b>e-Residency</b>. If you own one and also work in it, you can pay yourself with <b>salary</b>, <b>dividends</b>, or a mix — each taxed differently. This tool shows your <b>Estonian</b> take-home for any split, using 2026 rates, computed entirely in your browser.</p>
+    <p class="sub-caveat">⚠️ <b>Estonian taxes only</b> — if you're a tax resident of another country, you may also owe tax there on this income. Check your local rules or a tax advisor.</p>
   </header>
 
   <div class="grid">
