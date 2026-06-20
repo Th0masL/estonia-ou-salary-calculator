@@ -4,7 +4,7 @@ A simple, single-page calculator for estimating your **take-home pay** from an E
 private limited company (OÜ), when you pay yourself with a mix of **monthly salary** and
 **dividends** (paid out yearly or bi-yearly).
 
-👉 **Live:** https://th0masl.github.io/estonian-ou-salary-calculator/
+👉 **Live:** https://th0masl.github.io/estonia-ou-salary-calculator/
 
 Everything runs in your browser — no backend, no tracking, no data leaves your machine.
 
@@ -53,5 +53,6 @@ python3 -m http.server 8000
 ## Disclaimer
 
 Estimates only, based on Estonian tax rules effective 2026. The funded pension (II pillar)
-is your own savings, shown as a deduction from take-home cash. This is **not tax advice** —
-verify with the [Estonian Tax and Customs Board](https://www.emta.ee/en) or your accountant.
+is withheld from salary — it lowers take-home cash here but is your own retirement savings,
+not a tax. This is **not tax advice** — verify with the
+[Estonian Tax and Customs Board](https://www.emta.ee/en) or your accountant.
