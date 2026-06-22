@@ -78,11 +78,12 @@
   .headline .mo { color: var(--muted); font-size: 1rem; }
   .headline .mo b { color: var(--ink); }
 
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   table { width: 100%; border-collapse: collapse; font-size: .9rem; }
-  th { text-align: right; font-size: .72rem; text-transform: uppercase; letter-spacing:.06em; color: var(--muted); padding: 0 0 8px; font-weight: 700; }
-  th:first-child { text-align: left; }
+  th { text-align: right; font-size: .72rem; text-transform: uppercase; letter-spacing:.06em; color: var(--muted); padding: 0 0 8px 18px; font-weight: 700; }
+  th:first-child { text-align: left; padding-left: 0; }
   td { padding: 5px 0; border-top: 1px solid var(--line); }
-  td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; padding-left: 18px; }
   tr.lvl1 td:first-child { padding-left: 0; font-weight: 700; }
   tr.lvl2 td:first-child { padding-left: 16px; }
   tr.lvl3 td:first-child { padding-left: 34px; color: #374151; }
@@ -201,12 +202,14 @@
         <div class="mo">≈ <b id="finalMonth">€0</b> / month</div>
       </div>
 
-      <table>
-        <thead>
-          <tr><th>Breakdown</th><th>Yearly</th><th>Monthly</th></tr>
-        </thead>
-        <tbody id="rows"></tbody>
-      </table>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Breakdown</th><th>Year</th><th>Month</th><th>Day</th><th>Hour</th></tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
 
       <p class="note info" id="divFreqNote" style="display:none"></p>
 
@@ -230,6 +233,8 @@
           <div><span>VAT (EE clients only)</span><span>24%</span></div>
           <div><span>Min. social tax (no salary)</span><span>€292.38/mo</span></div>
           <div><span>Self-funded pension (no salary)</span><span>6%</span></div>
+          <div><span>Working days / month</span><span>21</span></div>
+          <div><span>Hours / day</span><span>8</span></div>
         </div>
       </details>
     </section>
@@ -299,6 +304,7 @@ const bill = $("bill"), salaryPct = $("salaryPct"), salaryPctNum = $("salaryPctN
 const basicEx = $("basicEx"), isEE = $("isEE"), payPension = $("payPension"), pensionToggle = $("pensionToggle");
 
 const eur = new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+const eur1 = new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR", minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const pct = n => (n).toLocaleString("en-IE", { maximumFractionDigits: 1 }) + "%";
 const fn = n => `<sup class="fn"><a href="#ref${n}" title="See source ${n}">${n}</a></sup>`;
 
@@ -346,9 +352,13 @@ function calc() {
 
 function row(label, cls, yearly) {
   const mo = yearly / 12;
+  const daily = mo / 21;       // 21 working days / month
+  const hourly = daily / 8;    // 8 hours / day
   return `<tr class="${cls}"><td>${label}</td>` +
          `<td class="num">${eur.format(yearly)}</td>` +
-         `<td class="num">${eur.format(mo)}</td></tr>`;
+         `<td class="num">${eur.format(mo)}</td>` +
+         `<td class="num">${eur.format(daily)}</td>` +
+         `<td class="num">${eur1.format(hourly)}</td></tr>`;
 }
 
 function render() {
